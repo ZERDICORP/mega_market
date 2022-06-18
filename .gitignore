@@ -12,10 +12,6 @@ target/
 .springBeans
 .sts4-cache
 
-### Config ###
-/src/main/resources/application.properties
-/src/test/resources/test.properties
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
