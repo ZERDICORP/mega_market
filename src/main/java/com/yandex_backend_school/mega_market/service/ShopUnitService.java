@@ -27,8 +27,13 @@ public class ShopUnitService {
     final List<ImportsRequestBodyItem> requestBodyItems = importsRequestBody.getItems();
     for (ImportsRequestBodyItem requestBodyItem : requestBodyItems) {
       switch (requestBodyItem.getType()) {
-        case OFFER -> offerService.save(requestBodyItem, importsRequestBody.getUpdateDate());
-        case CATEGORY -> categoryService.save(requestBodyItem);
+        case OFFER:
+          offerService.save(requestBodyItem, importsRequestBody.getUpdateDate());
+          break;
+
+        case CATEGORY:
+          categoryService.save(requestBodyItem);
+          break;
       }
     }
   }
