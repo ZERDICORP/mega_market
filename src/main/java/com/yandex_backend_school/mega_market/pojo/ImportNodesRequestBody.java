@@ -20,10 +20,10 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @Validated
-public class ImportsRequestBody {
+public class ImportNodesRequestBody {
   @NotEmpty
   @NotNull
-  private List<@Valid ImportsRequestBodyItem> items;
+  private List<@Valid ImportNodesRequestBodyItem> items;
 
   @NotNull
   @JsonDeserialize(using = DateDeserializer.class)

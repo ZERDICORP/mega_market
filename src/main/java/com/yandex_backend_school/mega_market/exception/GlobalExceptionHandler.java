@@ -4,10 +4,10 @@ import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author zerdicorp
@@ -16,11 +16,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 
 @ControllerAdvice
-public class BadRequestExceptionHandler {
-  @ExceptionHandler
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
+public class GlobalExceptionHandler {
+  @ExceptionHandler({ItemNotFoundException.class})
   @ResponseBody
-  public ResponseEntity<Object> validationFailed(Exception e) {
+  public ResponseEntity<Object> itemNotFoundException(Exception e) {
+    return new ResponseEntity<>(
+      new ErrorResponseBody(HttpStatus.NOT_FOUND.value(), Message.ITEM_NOT_FOUND),
+      HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler({MethodArgumentNotValidException.class})
+  @ResponseBody
+  public ResponseEntity<Object> badRequestException(Exception e) {
     return new ResponseEntity<>(
       new ErrorResponseBody(HttpStatus.BAD_REQUEST.value(), Message.VALIDATION_FAILED),
       HttpStatus.BAD_REQUEST);

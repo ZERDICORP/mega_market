@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
-import com.yandex_backend_school.mega_market.pojo.ImportsRequestBody;
-import com.yandex_backend_school.mega_market.pojo.ImportsRequestBodyItem;
+import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
+import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ public class ImportsIntegrationTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-  private void makeRequestAndGetBadRequestStatusWithValidationFailedMessage(ImportsRequestBody requestBody)
+  private void makeRequestAndGetBadRequestStatusWithValidationFailedMessage(ImportNodesRequestBody requestBody)
     throws Exception {
     final MvcResult mvcResult = this.mockMvc.perform(post(baseUrl)
         .content(objectMapper.writeValueAsString(requestBody))
@@ -64,14 +64,14 @@ public class ImportsIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestStatusBecauseNameIsBlank() throws Exception {
-    final ImportsRequestBodyItem requestBodyItem = new ImportsRequestBodyItem(
-      UUID.randomUUID(),
+    final ImportNodesRequestBodyItem requestBodyItem = new ImportNodesRequestBodyItem(
+      UUID.randomUUID().toString(),
       null,
       Type.CATEGORY,
       "",
       null);
 
-    final ImportsRequestBody requestBody = new ImportsRequestBody();
+    final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
     requestBody.setUpdateDate(new Date());
 
@@ -80,14 +80,14 @@ public class ImportsIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestStatusBecauseCategoryIsNull() throws Exception {
-    final ImportsRequestBodyItem requestBodyItem = new ImportsRequestBodyItem(
-      UUID.randomUUID(),
+    final ImportNodesRequestBodyItem requestBodyItem = new ImportNodesRequestBodyItem(
+      UUID.randomUUID().toString(),
       null,
       null,
       "category",
       null);
 
-    final ImportsRequestBody requestBody = new ImportsRequestBody();
+    final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
     requestBody.setUpdateDate(new Date());
 
@@ -96,14 +96,14 @@ public class ImportsIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestStatusBecauseIdIsNull() throws Exception {
-    final ImportsRequestBodyItem requestBodyItem = new ImportsRequestBodyItem(
+    final ImportNodesRequestBodyItem requestBodyItem = new ImportNodesRequestBodyItem(
       null,
       null,
       Type.CATEGORY,
       "category",
       null);
 
-    final ImportsRequestBody requestBody = new ImportsRequestBody();
+    final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
     requestBody.setUpdateDate(new Date());
 
@@ -112,14 +112,14 @@ public class ImportsIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestStatusBecauseUpdateDateIsNull() throws Exception {
-    final ImportsRequestBodyItem requestBodyItem = new ImportsRequestBodyItem(
-      UUID.randomUUID(),
+    final ImportNodesRequestBodyItem requestBodyItem = new ImportNodesRequestBodyItem(
+      UUID.randomUUID().toString(),
       null,
       Type.CATEGORY,
       "category",
       null);
 
-    final ImportsRequestBody requestBody = new ImportsRequestBody();
+    final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
     requestBody.setUpdateDate(null);
 
@@ -128,14 +128,14 @@ public class ImportsIntegrationTest {
 
   @Test
   public void shouldReturnOkStatus() throws Exception {
-    final ImportsRequestBodyItem requestBodyItem = new ImportsRequestBodyItem(
-      UUID.randomUUID(),
+    final ImportNodesRequestBodyItem requestBodyItem = new ImportNodesRequestBodyItem(
+      UUID.randomUUID().toString(),
       null,
       Type.CATEGORY,
       "category",
       null);
 
-    final ImportsRequestBody requestBody = new ImportsRequestBody();
+    final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
     requestBody.setUpdateDate(new Date());
 

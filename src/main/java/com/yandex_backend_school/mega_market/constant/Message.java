@@ -8,4 +8,5 @@ package com.yandex_backend_school.mega_market.constant;
 
 public interface Message {
   String VALIDATION_FAILED = "Validation Failed";
+  String ITEM_NOT_FOUND = "Item not found";
 }

@@ -1,7 +1,7 @@
 package com.yandex_backend_school.mega_market.entity;
 
+import com.yandex_backend_school.mega_market.constant.Type;
 import java.util.Date;
-import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,29 +14,25 @@ import lombok.ToString;
 /**
  * @author zerdicorp
  * @project mega_market
- * @created 18/06/2022 - 2:13 PM
+ * @created 18/06/2022 - 6:16 PM
  */
 
-@Entity
+@Entity(name = "node")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Offer {
+public class Node {
   @Id
-  @Column(nullable = false, columnDefinition = "UUID")
-  private UUID id;
-
+  @Column(nullable = false)
+  private String id;
   @Column(nullable = false)
   private String name;
-
-  @Column(nullable = false, columnDefinition = "UUID")
-  private UUID parentId;
-
-  @Column(nullable = false)
+  private String parent_id;
   private Integer price;
-
+  @Column(nullable = false)
+  private Type type;
   @Column(nullable = false)
   private Date date;
 }

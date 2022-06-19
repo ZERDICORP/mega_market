@@ -7,6 +7,5 @@ package com.yandex_backend_school.mega_market.constant;
  */
 
 public interface Regex {
-  String UUID = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
-  String POSITIVE_INTEGER_NUMBER = "^[0-9]*$";
+  String UUID = "|[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
 }
