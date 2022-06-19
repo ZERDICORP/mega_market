@@ -116,5 +116,9 @@ http {
   }
 }
 ```
+> Don't forget to restart nginx.
+```
+$ sudo systemctl restart nginx
+```
 
 #### 6. The project is now available on port `80`
