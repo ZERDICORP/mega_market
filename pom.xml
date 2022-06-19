@@ -19,7 +19,7 @@
   <description>Test task for admission to the Yandex backend development school.</description>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
   </properties>
 
   <dependencies>
