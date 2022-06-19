@@ -1,12 +1,12 @@
-# mega_market
+# mega_market :moneybag:
 #### Test task for admission to the Yandex backend development school.
 
-## What is this project about?
-Have you ever had to surf the Internet looking for bargain shops?  
-Or maybe you are annoyed by opaque price changes?  
-Maybe you want to finally take matters into your own hands and control the search for offers?  
+## What is this project about? :raising_hand:
+Have you ever had to surf the Internet looking for **bargain shops**?  
+Or maybe you are annoyed by **opaque price** changes?  
+Maybe you want to finally take matters into your own hands and **control** the search for **offers**?
 
-**Then you are at the right place!**  
+**Then you are at the right place!**
 
 **Mega Market** can provide you:
 1. Adding products/categories;
@@ -15,7 +15,15 @@ Maybe you want to finally take matters into your own hands and control the searc
 4. Search for products in the last 24 hours;
 5. Obtaining a history of product/category changes.
 
-## Deployment Guide
+## Technology stack :wrench:
+* ***Java*** (v17.0.3)
+    - ***Spring-Boot*** (v2.7.0)
+* ***MariaDB*** (v10.8.3)
+* ***Apache Maven*** (v3.8.4)
+* ***Docker*** (v20.10.17)
+* ***Nginx*** (v1.22.0)
+
+## Deployment guide :rocket:
 
 #### 1. Make sure you have all dependencies installed
 ```
@@ -121,4 +129,4 @@ http {
 $ sudo systemctl restart nginx
 ```
 
-#### 6. The project is now available on port `80`
+#### 6. The project is now available on port `80` :confetti_ball:
