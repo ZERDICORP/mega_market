@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class GetNodeTreeByParentIdUnitTest {
+public class GetNodeTreeUnitTest {
   @SpyBean
   private NodeService nodeService;
 
