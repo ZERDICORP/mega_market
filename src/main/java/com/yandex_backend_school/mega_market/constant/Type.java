@@ -7,6 +7,6 @@ package com.yandex_backend_school.mega_market.constant;
  */
 
 public enum Type {
-  OFFER,
-  CATEGORY
+  CATEGORY,
+  OFFER
 }

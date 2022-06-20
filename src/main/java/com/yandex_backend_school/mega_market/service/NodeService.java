@@ -3,15 +3,18 @@ package com.yandex_backend_school.mega_market.service;
 import com.yandex_backend_school.mega_market.constant.DateTimeTemplate;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
+import com.yandex_backend_school.mega_market.entity.NodeChange;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
 import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBodyItem;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
+import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
 import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -165,16 +168,36 @@ public class NodeService {
   }
 
   public void importNodes(ImportNodesRequestBody requestBody) {
-    final List<Node> requestBodyItems = requestBody.getItems().stream()
-      .map(i -> new Node(
-        i.getId(),
-        i.getName(),
-        i.getParentId(),
-        i.getPrice(),
-        i.getType(),
-        requestBody.getUpdateDate()))
-      .toList();
+    final LocalDateTime updateDate = requestBody.getUpdateDate();
+    final List<ImportNodesRequestBodyItem> items = requestBody.getItems();
 
-    nodeRepository.saveAll(requestBodyItems);
+    // Sorting items so that categories come first, then offers.
+    items.sort(Comparator.comparingInt(n -> n.getType().ordinal()));
+
+    items.forEach(n -> {
+      nodeRepository.save(new Node(
+        n.getId(),
+        n.getName(),
+        n.getParentId(),
+        n.getPrice(),
+        n.getType(),
+        updateDate));
+
+      if (n.getType().equals(Type.OFFER)) {
+        nodeChangeRepository.save(new NodeChange(
+          n.getId(),
+          updateDate,
+          n.getPrice()));
+
+        nodeRepository.findById(n.getParentId())
+          .ifPresent(pn -> nodeChangeRepository.save(new NodeChange(
+            pn.getId(),
+            updateDate,
+            // On the line below, I call the getNode method to
+            // recursively find out the average price of all
+            // possible children of the current category.
+            getNode(pn).getPrice())));
+      }
+    });
   }
 }
