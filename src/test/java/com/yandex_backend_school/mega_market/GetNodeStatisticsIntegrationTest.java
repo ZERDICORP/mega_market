@@ -65,7 +65,10 @@ public class GetNodeStatisticsIntegrationTest {
     "/sql/insert_node.sql",
     "/sql/insert_node_changes.sql"
   }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-  @Sql(value = {"/sql/truncate_node.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  @Sql(value = {
+    "/sql/truncate_node.sql",
+    "/sql/truncate_node_change.sql"
+  }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   public void shouldReturnOkStatusAndOneOfTwoNodeChanges() throws Exception {
     final MvcResult mvcResult = this.mockMvc.perform(get(
         baseUrl + "/863e1a7a-1304-42ae-943b-179184c077e3/statistic?" +

@@ -1,7 +1,7 @@
 package com.yandex_backend_school.mega_market.controller;
 
 import com.yandex_backend_school.mega_market.constant.Regex;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.service.NodeService;
@@ -37,10 +37,10 @@ public class NodeController {
 
   @GetMapping("/node/{id}/statistic")
   public GetNodesResponseBody getNodeStatistics(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id,
-                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                      @RequestParam(required = false) LocalDateTime dateStart,
-                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                      @RequestParam(required = false) LocalDateTime dateEnd) {
+                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                @RequestParam(required = false) LocalDateTime dateStart,
+                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                @RequestParam(required = false) LocalDateTime dateEnd) {
     return nodeService.getNodeChangeStatistics(id, dateStart, dateEnd);
   }
 
@@ -56,7 +56,7 @@ public class NodeController {
   }
 
   @GetMapping("/nodes/{id}")
-  public GetNodeResponseBodyItem getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
+  public GetNodeResponseBody getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     return nodeService.getNode(id);
   }
 

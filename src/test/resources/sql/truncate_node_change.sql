@@ -1,0 +1,1 @@
+TRUNCATE node_change;

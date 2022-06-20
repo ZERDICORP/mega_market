@@ -3,7 +3,7 @@ package com.yandex_backend_school.mega_market;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
@@ -85,8 +85,8 @@ public class GetNodeIntegrationTest {
       .andExpect(status().isOk())
       .andReturn();
 
-    final GetNodeResponseBodyItem getNodesResponseBody = objectMapper.readValue(
-      mvcResult.getResponse().getContentAsString(), GetNodeResponseBodyItem.class);
+    final GetNodeResponseBody getNodesResponseBody = objectMapper.readValue(
+      mvcResult.getResponse().getContentAsString(), GetNodeResponseBody.class);
 
     assertNotNull(getNodesResponseBody);
     assertEquals(getNodesResponseBody.getId(), id);

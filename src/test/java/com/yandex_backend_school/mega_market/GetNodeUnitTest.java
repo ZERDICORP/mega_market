@@ -3,7 +3,7 @@ package com.yandex_backend_school.mega_market;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
 import java.time.LocalDateTime;
@@ -56,7 +56,7 @@ public class GetNodeUnitTest {
     Mockito.when(nodeRepository.findByParentId(parentNode.getId()))
       .thenReturn(nodes);
 
-    final GetNodeResponseBodyItem responseBody = nodeService.getNode(parentNode);
+    final GetNodeResponseBody responseBody = nodeService.getNode(parentNode);
     assertEquals(parentNode.getId(), responseBody.getId());
     assertEquals(node.getPrice(), responseBody.getPrice());
 
@@ -108,7 +108,7 @@ public class GetNodeUnitTest {
     Mockito.when(nodeRepository.findById(parentNode.getId()))
       .thenReturn(Optional.of(parentNode));
 
-    final GetNodeResponseBodyItem getNodesResponseBody = nodeService.getNode(parentNode.getId());
+    final GetNodeResponseBody getNodesResponseBody = nodeService.getNode(parentNode.getId());
     assertNotNull(getNodesResponseBody);
     assertEquals(getNodesResponseBody.getId(), parentNode.getId());
 
@@ -150,7 +150,7 @@ public class GetNodeUnitTest {
       .when(nodeService)
       .getNode(ArgumentMatchers.eq(parentNode));
 
-    final GetNodeResponseBodyItem getNodesResponseBody = nodeService.getNode(parentNode.getId());
+    final GetNodeResponseBody getNodesResponseBody = nodeService.getNode(parentNode.getId());
     assertNull(getNodesResponseBody);
 
     Mockito.verify(nodeRepository, Mockito.times(1))

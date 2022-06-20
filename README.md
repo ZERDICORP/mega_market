@@ -2,9 +2,9 @@
 #### Test task for admission to the Yandex backend development school.
 
 ## What is this project about? :raising_hand:
-Have you ever had to surf the Internet looking for **bargain shops**?  
+_Have you ever had to surf the Internet looking for **bargain shops**?  
 Or maybe you are annoyed by **opaque price** changes?  
-Maybe you want to finally take matters into your own hands and **control** the search for **offers**?
+Maybe you want to finally take matters into your own hands and **control** the search for **offers**?_
 
 **Then you are at the right place!**
 

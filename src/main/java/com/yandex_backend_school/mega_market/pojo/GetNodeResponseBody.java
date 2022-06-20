@@ -20,18 +20,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties("childrenPriceSum")
-public class GetNodeResponseBodyItem extends GetNodesResponseBodyItem {
-  private List<GetNodeResponseBodyItem> children;
+public class GetNodeResponseBody extends GetNodesResponseBodyItem {
+  private List<GetNodeResponseBody> children;
   private Integer childrenPriceSum;
 
-  public GetNodeResponseBodyItem(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
-                                 List<GetNodeResponseBodyItem> children, Integer childrenPriceSum) {
+  public GetNodeResponseBody(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
+                             List<GetNodeResponseBody> children, Integer childrenPriceSum) {
     this(id, name, type, parentId, date, price, children);
     this.childrenPriceSum = childrenPriceSum;
   }
 
-  public GetNodeResponseBodyItem(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
-                                 List<GetNodeResponseBodyItem> children) {
+  public GetNodeResponseBody(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
+                             List<GetNodeResponseBody> children) {
     this.id = id;
     this.name = name;
     this.type = type;
