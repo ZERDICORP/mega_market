@@ -62,6 +62,8 @@ public class GetNodeStatisticsIntegrationTest {
 
   @Test
   @Sql(value = {
+    "/sql/truncate_node.sql",
+    "/sql/truncate_node_change.sql",
     "/sql/insert_node.sql",
     "/sql/insert_node_changes.sql"
   }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

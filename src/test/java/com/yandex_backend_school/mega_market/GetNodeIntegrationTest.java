@@ -74,7 +74,10 @@ public class GetNodeIntegrationTest {
   }
 
   @Test
-  @Sql(value = {"/sql/insert_node.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(value = {
+    "/sql/truncate_node.sql",
+    "/sql/insert_node.sql"
+  }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
   @Sql(value = {"/sql/truncate_node.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   public void shouldReturnOkStatusAndOffer() throws Exception {
     final String id = "863e1a7a-1304-42ae-943b-179184c077e3";

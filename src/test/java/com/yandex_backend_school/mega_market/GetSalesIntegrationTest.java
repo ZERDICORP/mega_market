@@ -60,6 +60,7 @@ public class GetSalesIntegrationTest {
 
   @Test
   @Sql(value = {
+    "/sql/truncate_node.sql",
     "/sql/insert_nodes_with_date_difference.sql"
   }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
   @Sql(value = {"/sql/truncate_node.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
