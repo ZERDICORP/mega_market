@@ -1,7 +1,7 @@
 package com.yandex_backend_school.mega_market;
 
 import com.yandex_backend_school.mega_market.constant.Type;
-import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
 import java.time.LocalDateTime;
@@ -41,9 +41,9 @@ public class GetSalesUnitTest {
         ArgumentMatchers.eq(Type.OFFER),
         ArgumentMatchers.eq(date));
 
-    final GetSalesResponseBody getSalesResponseBody = nodeService.getUpdatedIn24HoursOffers(date);
-    assertNotNull(getSalesResponseBody);
-    assertNotNull(getSalesResponseBody.getItems());
+    final GetNodesResponseBody getNodesResponseBody = nodeService.getUpdatedIn24HoursOffers(date);
+    assertNotNull(getNodesResponseBody);
+    assertNotNull(getNodesResponseBody.getItems());
 
     Mockito.verify(nodeRepository, Mockito.times(1))
       .findUpdatedIn24Hours(

@@ -1,9 +1,8 @@
 package com.yandex_backend_school.mega_market.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yandex_backend_school.mega_market.constant.Type;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,32 +11,19 @@ import lombok.Setter;
 /**
  * @author zerdicorp
  * @project mega_market
- * @created 19/06/2022 - 9:34 AM
+ * @created 20/06/2022 - 12:59 PM
  */
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties("childrenPriceSum")
-public class GetNodesResponseBodyItem extends GetSalesResponseBodyItem {
-  private List<GetNodesResponseBodyItem> children;
-  private Integer childrenPriceSum;
-
-  public GetNodesResponseBodyItem(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
-                                  List<GetNodesResponseBodyItem> children, Integer childrenPriceSum) {
-    this(id, name, type, parentId, date, price, children);
-    this.childrenPriceSum = childrenPriceSum;
-  }
-
-  public GetNodesResponseBodyItem(String id, String name, Type type, String parentId, LocalDateTime date, Integer price,
-                                  List<GetNodesResponseBodyItem> children) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    this.parentId = parentId;
-    this.date = date;
-    this.price = price;
-    this.children = children;
-  }
+public class GetNodesResponseBodyItem {
+  protected String id;
+  protected String name;
+  protected Type type;
+  protected String parentId;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  protected LocalDateTime date;
+  protected Integer price;
 }

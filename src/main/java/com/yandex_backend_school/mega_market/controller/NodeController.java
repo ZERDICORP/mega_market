@@ -1,13 +1,12 @@
 package com.yandex_backend_school.mega_market.controller;
 
 import com.yandex_backend_school.mega_market.constant.Regex;
-import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
-import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.service.NodeService;
 import java.time.LocalDateTime;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,20 +35,29 @@ public class NodeController {
     this.nodeService = nodeService;
   }
 
+  @GetMapping("/node/{id}/statistic")
+  public GetNodesResponseBody getNodeStatistics(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id,
+                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                      @RequestParam(required = false) LocalDateTime dateStart,
+                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                      @RequestParam(required = false) LocalDateTime dateEnd) {
+    return nodeService.getNodeChangeStatistics(id, dateStart, dateEnd);
+  }
+
   @GetMapping("/sales")
-  public GetSalesResponseBody getSales(@NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+  public GetNodesResponseBody getSales(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                        @RequestParam LocalDateTime date) {
     return nodeService.getUpdatedIn24HoursOffers(date);
   }
 
   @DeleteMapping("/delete/{id}")
   public void deleteNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
-    nodeService.deleteNodeTree(id);
+    nodeService.deleteNode(id);
   }
 
   @GetMapping("/nodes/{id}")
-  public GetNodesResponseBodyItem getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
-    return nodeService.getNodeTree(id);
+  public GetNodeResponseBodyItem getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
+    return nodeService.getNode(id);
   }
 
   @PostMapping("/imports")

@@ -41,7 +41,7 @@ public class DeleteNodeUnitTest {
     Mockito.when(nodeRepository.deleteByParentId(parentNode.getId()))
       .thenReturn(new ArrayList<>());
 
-    nodeService.deleteNodeTree(parentNode);
+    nodeService.deleteNode(parentNode);
 
     Mockito.verify(nodeRepository, Mockito.times(1))
       .deleteByParentId(ArgumentMatchers.eq(parentNode.getId()));
@@ -60,7 +60,7 @@ public class DeleteNodeUnitTest {
       Mockito.when(nodeRepository.findById(parentNode.getId()))
         .thenReturn(Optional.empty());
 
-      nodeService.deleteNodeTree(parentNode.getId());
+      nodeService.deleteNode(parentNode.getId());
     });
   }
 
@@ -73,7 +73,7 @@ public class DeleteNodeUnitTest {
     Mockito.when(nodeRepository.findById(parentNode.getId()))
       .thenReturn(Optional.of(parentNode));
 
-    nodeService.deleteNodeTree(parentNode.getId());
+    nodeService.deleteNode(parentNode.getId());
 
     Mockito.verify(nodeRepository, Mockito.times(1))
       .findById(ArgumentMatchers.eq(parentNode.getId()));
@@ -85,10 +85,10 @@ public class DeleteNodeUnitTest {
       .getType();
 
     Mockito.verify(nodeService, Mockito.times(0))
-      .deleteNodeTree(ArgumentMatchers.eq(parentNode));
+      .deleteNode(ArgumentMatchers.eq(parentNode));
 
     Mockito.verify(nodeService, Mockito.times(1))
-      .deleteNodeTree(ArgumentMatchers.eq(parentNode.getId()));
+      .deleteNode(ArgumentMatchers.eq(parentNode.getId()));
   }
 
   @Test
@@ -102,9 +102,9 @@ public class DeleteNodeUnitTest {
 
     Mockito.doNothing()
       .when(nodeService)
-      .deleteNodeTree(ArgumentMatchers.eq(parentNode));
+      .deleteNode(ArgumentMatchers.eq(parentNode));
 
-    nodeService.deleteNodeTree(parentNode.getId());
+    nodeService.deleteNode(parentNode.getId());
 
     Mockito.verify(nodeRepository, Mockito.times(1))
       .findById(ArgumentMatchers.eq(parentNode.getId()));
@@ -116,9 +116,9 @@ public class DeleteNodeUnitTest {
       .getType();
 
     Mockito.verify(nodeService, Mockito.times(1))
-      .deleteNodeTree(ArgumentMatchers.eq(parentNode));
+      .deleteNode(ArgumentMatchers.eq(parentNode));
 
     Mockito.verify(nodeService, Mockito.times(1))
-      .deleteNodeTree(ArgumentMatchers.eq(parentNode.getId()));
+      .deleteNode(ArgumentMatchers.eq(parentNode.getId()));
   }
 }

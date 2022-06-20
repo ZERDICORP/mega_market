@@ -73,7 +73,7 @@ public class DeleteNodeIntegrationTest {
   }
 
   @Test
-  @Sql(value = {"/sql/insert_offer.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(value = {"/sql/insert_node.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
   @Sql(value = {"/sql/truncate_node.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   public void shouldReturnOkStatus() throws Exception {
     mockMvc.perform(delete(

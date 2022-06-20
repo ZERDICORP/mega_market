@@ -14,10 +14,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class GetSalesResponseBody {
-  private List<GetSalesResponseBodyItem> items;
+public class GetNodesResponseBody {
+  private List<GetNodesResponseBodyItem> items;
 
-  public GetSalesResponseBody(List<GetSalesResponseBodyItem> items) {
+  public GetNodesResponseBody(List<GetNodesResponseBodyItem> items) {
     this.items = items;
   }
 }
