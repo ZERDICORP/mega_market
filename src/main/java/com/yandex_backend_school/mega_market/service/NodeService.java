@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,11 +78,17 @@ public class NodeService {
   }
 
   public void deleteNode(Node parentNode) {
-    nodeRepository.deleteByParentId(parentNode.getId())
+    final List<Node> deletedNodes = nodeRepository.deleteByParentId(parentNode.getId());
+    final List<String> deletedNodeIds = Stream.concat(deletedNodes.stream(), Stream.of(parentNode))
+      .map(Node::getId)
+      .toList();
+
+    deletedNodes
       .stream()
       .filter(n -> n.getType().equals(Type.CATEGORY))
       .forEach(this::deleteNode);
 
+    nodeChangeRepository.deleteAllByNodeIdInBatch(deletedNodeIds);
     nodeRepository.delete(parentNode);
   }
 
@@ -164,6 +171,10 @@ public class NodeService {
         null);
     }
 
+    // If the node is a category, then we need to look for possible
+    // children for it, since we need to calculate their average
+    // price, and if one of the children is also a category, do the
+    // same for this child.
     return getNode(parentNode);
   }
 

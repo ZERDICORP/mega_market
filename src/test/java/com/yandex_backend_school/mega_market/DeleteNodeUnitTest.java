@@ -3,6 +3,7 @@ package com.yandex_backend_school.mega_market;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
+import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
 import java.util.ArrayList;
@@ -33,8 +34,11 @@ public class DeleteNodeUnitTest {
   @MockBean
   private NodeRepository nodeRepository;
 
+  @MockBean
+  private NodeChangeRepository nodeChangeRepository;
+
   @Test
-  public void shouldDeleteByParentIdAndThenDeleteParentNode() {
+  public void shouldDeleteByParentIdAndThenDeleteParentNodeAndDeleteNodeChangesByNodeIdInBatch() {
     final Node parentNode = Mockito.spy(new Node());
     parentNode.setId(UUID.randomUUID().toString());
 
@@ -43,11 +47,17 @@ public class DeleteNodeUnitTest {
 
     nodeService.deleteNode(parentNode);
 
+    Mockito.verify(parentNode, Mockito.times(3))
+      .getId();
+
     Mockito.verify(nodeRepository, Mockito.times(1))
       .deleteByParentId(ArgumentMatchers.eq(parentNode.getId()));
 
     Mockito.verify(nodeRepository, Mockito.times(1))
       .delete(ArgumentMatchers.eq(parentNode));
+
+    Mockito.verify(nodeChangeRepository, Mockito.times(1))
+      .deleteAllByNodeIdInBatch(ArgumentMatchers.anyList());
   }
 
   @Test
