@@ -29,7 +29,7 @@ public class Node {
   private String id;
   @Column(nullable = false)
   private String name;
-  private String parent_id;
+  private String parentId;
   private Integer price;
   @Column(nullable = false)
   private Type type;

@@ -3,7 +3,6 @@ package com.yandex_backend_school.mega_market.repository;
 import com.yandex_backend_school.mega_market.entity.Node;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -14,6 +13,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NodeRepository extends JpaRepository<Node, String> {
-  @Query("SELECT n FROM node n WHERE n.parent_id = :parent_id")
-  List<Node> findAllByParentId(String parent_id);
+  List<Node> findByParentId(String parentId);
+  List<Node> deleteByParentId(String parentId);
 }

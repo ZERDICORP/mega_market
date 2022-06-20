@@ -9,6 +9,7 @@ import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,30 @@ public class NodeService {
     this.nodeRepository = nodeRepository;
   }
 
+  public void deleteNodeTree(Node parentNode) {
+    nodeRepository.deleteByParentId(parentNode.getId())
+      .stream()
+      .filter(n -> n.getType().equals(Type.CATEGORY))
+      .forEach(this::deleteNodeTree);
+
+    nodeRepository.delete(parentNode);
+  }
+
+  @Transactional
+  public void deleteNodeTree(String parentId) {
+    final Node parentNode = nodeRepository.findById(parentId)
+      .orElseThrow(ItemNotFoundException::new);
+
+    if (parentNode.getType().equals(Type.OFFER)) {
+      nodeRepository.delete(parentNode);
+      return;
+    }
+
+    deleteNodeTree(parentNode);
+  }
+
   public GetNodesResponseBody getNodeTree(Node parentNode) {
-    final List<GetNodesResponseBody> nodes = nodeRepository.findAllByParentId(parentNode.getId())
+    final List<GetNodesResponseBody> nodes = nodeRepository.findByParentId(parentNode.getId())
       .stream()
       .map(n -> {
         if (n.getType().equals(Type.OFFER)) {
@@ -36,7 +59,7 @@ public class NodeService {
             n.getId(),
             n.getName(),
             n.getType(),
-            n.getParent_id(),
+            n.getParentId(),
             n.getDate(),
             n.getPrice(),
             null);
@@ -62,13 +85,18 @@ public class NodeService {
       })
       .reduce(0, Integer::sum);
 
+    Integer averagePrice = priceSum / Math.max(1, fullLength.get());
+    if (averagePrice == 0) {
+      averagePrice = null;
+    }
+
     return new GetNodesResponseBody(
       parentNode.getId(),
       parentNode.getName(),
       parentNode.getType(),
-      parentNode.getParent_id(),
+      parentNode.getParentId(),
       parentNode.getDate(),
-      priceSum / Math.max(1, fullLength.get()),
+      averagePrice,
       nodes,
       priceSum);
   }
@@ -82,7 +110,7 @@ public class NodeService {
         parentNode.getId(),
         parentNode.getName(),
         parentNode.getType(),
-        parentNode.getParent_id(),
+        parentNode.getParentId(),
         parentNode.getDate(),
         parentNode.getPrice(),
         null);

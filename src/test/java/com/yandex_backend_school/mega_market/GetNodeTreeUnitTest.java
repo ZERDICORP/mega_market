@@ -53,7 +53,7 @@ public class GetNodeTreeUnitTest {
     parentNode.setId(UUID.randomUUID().toString());
     parentNode.setType(Type.OFFER);
 
-    Mockito.when(nodeRepository.findAllByParentId(parentNode.getId()))
+    Mockito.when(nodeRepository.findByParentId(parentNode.getId()))
       .thenReturn(nodes);
 
     final GetNodesResponseBody responseBody = nodeService.getNodeTree(parentNode);
@@ -61,7 +61,7 @@ public class GetNodeTreeUnitTest {
     assertEquals(node.getPrice(), responseBody.getPrice());
 
     Mockito.verify(nodeRepository, Mockito.times(1))
-      .findAllByParentId(ArgumentMatchers.eq(parentNode.getId()));
+      .findByParentId(ArgumentMatchers.eq(parentNode.getId()));
 
     Mockito.verify(parentNode, Mockito.times(1))
       .getType();
@@ -73,7 +73,7 @@ public class GetNodeTreeUnitTest {
       .getName();
 
     Mockito.verify(parentNode, Mockito.times(1))
-      .getParent_id();
+      .getParentId();
 
     Mockito.verify(parentNode, Mockito.times(1))
       .getDate();
@@ -86,7 +86,7 @@ public class GetNodeTreeUnitTest {
   }
 
   @Test
-  public void shouldThrowExceptionBecauseNodeIsNull() {
+  public void shouldThrowExceptionBecauseFindByIdMethodReturnsNull() {
     assertThrows(ItemNotFoundException.class, () -> {
       final Node parentNode = Mockito.spy(new Node());
       parentNode.setId(UUID.randomUUID().toString());
@@ -125,7 +125,7 @@ public class GetNodeTreeUnitTest {
       .getName();
 
     Mockito.verify(parentNode, Mockito.times(1))
-      .getParent_id();
+      .getParentId();
 
     Mockito.verify(parentNode, Mockito.times(1))
       .getDate();
@@ -166,7 +166,7 @@ public class GetNodeTreeUnitTest {
       .getName();
 
     Mockito.verify(parentNode, Mockito.times(0))
-      .getParent_id();
+      .getParentId();
 
     Mockito.verify(parentNode, Mockito.times(0))
       .getDate();
