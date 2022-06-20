@@ -5,6 +5,7 @@ import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.service.NodeService;
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,14 +31,14 @@ public class NodeController {
     this.nodeService = nodeService;
   }
 
-  @DeleteMapping("/delete/{id:" + Regex.UUID + "}")
-  public void deleteNode(@PathVariable String id) {
+  @DeleteMapping("/delete/{id}")
+  public void deleteNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     nodeService.deleteNodeTree(id);
   }
 
 
-  @GetMapping("/nodes/{id:" + Regex.UUID + "}")
-  public GetNodesResponseBody getNode(@PathVariable String id) {
+  @GetMapping("/nodes/{id}")
+  public GetNodesResponseBody getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     return nodeService.getNodeTree(id);
   }
 

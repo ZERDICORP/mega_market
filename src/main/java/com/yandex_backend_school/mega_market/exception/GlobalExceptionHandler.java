@@ -2,6 +2,7 @@ package com.yandex_backend_school.mega_market.exception;
 
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
+import javax.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,7 +26,10 @@ public class GlobalExceptionHandler {
       HttpStatus.NOT_FOUND);
   }
 
-  @ExceptionHandler({MethodArgumentNotValidException.class})
+  @ExceptionHandler({
+    MethodArgumentNotValidException.class,
+    ConstraintViolationException.class
+  })
   @ResponseBody
   public ResponseEntity<Object> badRequestException(Exception e) {
     return new ResponseEntity<>(

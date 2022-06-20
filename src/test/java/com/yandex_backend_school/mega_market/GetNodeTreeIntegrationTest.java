@@ -40,10 +40,20 @@ public class GetNodeTreeIntegrationTest {
   private ObjectMapper objectMapper;
 
   @Test
-  public void shouldReturnNotFoundStatusBecauseIdIsInvalid() throws Exception {
-    this.mockMvc.perform(get(baseUrl + "/123"))
+  public void shouldReturnBadRequestStatusBecauseIdIsInvalid() throws Exception {
+    final MvcResult mvcResult = this.mockMvc.perform(
+        get(baseUrl + "/123"))
       .andDo(print())
-      .andExpect(status().isNotFound());
+      .andExpect(status().isBadRequest())
+      .andReturn();
+
+    final ErrorResponseBody responseBody = objectMapper.readValue(
+      mvcResult.getResponse().getContentAsString(), ErrorResponseBody.class);
+
+    assertNotNull(responseBody);
+    assertNotNull(responseBody.getCode());
+    assertEquals(400, responseBody.getCode().intValue());
+    assertEquals(Message.VALIDATION_FAILED, responseBody.getMessage());
   }
 
   @Test

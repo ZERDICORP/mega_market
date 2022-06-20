@@ -39,10 +39,20 @@ public class DeleteNodeIntegrationTest {
   private ObjectMapper objectMapper;
 
   @Test
-  public void shouldReturnNotFoundStatusBecauseIdIsInvalid() throws Exception {
-    mockMvc.perform(delete(baseUrl + "/123"))
+  public void shouldReturnBadRequestStatusBecauseIdIsInvalid() throws Exception {
+    final MvcResult mvcResult = this.mockMvc.perform(
+        delete(baseUrl + "/123"))
       .andDo(print())
-      .andExpect(status().isNotFound());
+      .andExpect(status().isBadRequest())
+      .andReturn();
+
+    final ErrorResponseBody responseBody = objectMapper.readValue(
+      mvcResult.getResponse().getContentAsString(), ErrorResponseBody.class);
+
+    assertNotNull(responseBody);
+    assertNotNull(responseBody.getCode());
+    assertEquals(400, responseBody.getCode().intValue());
+    assertEquals(Message.VALIDATION_FAILED, responseBody.getMessage());
   }
 
   @Test

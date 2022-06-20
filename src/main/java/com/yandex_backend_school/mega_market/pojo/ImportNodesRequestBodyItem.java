@@ -23,9 +23,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ImportNodesRequestBodyItem {
   @NotNull
-  @Pattern(regexp = "^" + Regex.UUID + "$")
+  @Pattern(regexp = Regex.UUID_ONLY)
   private String id;
-  @Pattern(regexp = "^" + Regex.UUID + "$")
+  @Pattern(regexp = Regex.UUID_OR_EMPTY)
   private String parentId;
   @NotNull
   private Type type;
