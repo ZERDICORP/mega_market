@@ -2,6 +2,7 @@ package com.yandex_backend_school.mega_market.exception;
 
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
+import java.time.format.DateTimeParseException;
 import javax.validation.ConstraintViolationException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({
     MethodArgumentNotValidException.class,
     ConstraintViolationException.class,
-    ConversionFailedException.class
+    ConversionFailedException.class,
+    DateTimeParseException.class
   })
   @ResponseBody
   public ResponseEntity<Object> badRequestException(Exception e) {

@@ -1,7 +1,5 @@
 package com.yandex_backend_school.mega_market.pojo;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.yandex_backend_school.mega_market.deserializer.DateDeserializer;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
@@ -9,6 +7,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -26,6 +25,6 @@ public class ImportNodesRequestBody {
   private List<@Valid ImportNodesRequestBodyItem> items;
 
   @NotNull
-  @JsonDeserialize(using = DateDeserializer.class)
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
   private LocalDateTime updateDate;
 }
