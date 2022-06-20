@@ -9,15 +9,15 @@ Maybe you want to finally take matters into your own hands and **control** the s
 **Then you are at the right place!**
 
 **Mega Market** can provide you:
-1. Adding products/categories;
-2. Deleting products/categories;
-3. Search for products/categories;
-4. Search for products in the last 24 hours;
-5. Obtaining a history of product/category changes.
+1. Adding offers/categories;
+2. Deleting offers/categories;
+3. Search for offers/categories;
+4. Search for offers in the last 24 hours;
+5. Obtaining a history of offer/category changes.
 
 ## Technology stack :wrench:
 * ***Java*** (v17.0.3)
-    - ***Spring-Boot*** (v2.7.0)
+  - ***Spring-Boot*** (v2.7.0)
 * ***MariaDB*** (v10.8.3)
 * ***Apache Maven*** (v3.8.4)
 * ***Docker*** (v20.10.17)
