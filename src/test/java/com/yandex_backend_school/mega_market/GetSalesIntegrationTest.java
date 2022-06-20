@@ -3,7 +3,9 @@ package com.yandex_backend_school.mega_market;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
-import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBodyItem;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
@@ -23,15 +25,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author zerdicorp
  * @project mega_market
- * @created 19/06/2022 - 1:02 PM
+ * @created 20/06/2022 - 3:09 PM
  */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource("/test.properties")
-public class GetNodeTreeIntegrationTest {
-  private final String baseUrl = "/nodes";
+public class GetSalesIntegrationTest {
+  private final String baseUrl = "/sales?date=";
 
   @Autowired
   private MockMvc mockMvc;
@@ -40,9 +42,9 @@ public class GetNodeTreeIntegrationTest {
   private ObjectMapper objectMapper;
 
   @Test
-  public void shouldReturnBadRequestStatusBecauseIdIsInvalid() throws Exception {
-    final MvcResult mvcResult = this.mockMvc.perform(
-        get(baseUrl + "/123"))
+  public void shouldReturnBadRequestStatusBecauseDateNotMatchIsoFormat() throws Exception {
+    final MvcResult mvcResult = this.mockMvc.perform(get(
+        baseUrl + "2022-06-21 12:00:00.000Z"))
       .andDo(print())
       .andExpect(status().isBadRequest())
       .andReturn();
@@ -57,38 +59,29 @@ public class GetNodeTreeIntegrationTest {
   }
 
   @Test
-  public void shouldReturnItemNotFoundStatusBecauseNodeWithSpecifiedIdNotFound() throws Exception {
-    final MvcResult mvcResult = this.mockMvc.perform(
-        get(baseUrl + "/863e1a7a-1304-42ae-943b-179184c077e3"))
-      .andDo(print())
-      .andExpect(status().isNotFound())
-      .andReturn();
-
-    final ErrorResponseBody responseBody = objectMapper.readValue(
-      mvcResult.getResponse().getContentAsString(), ErrorResponseBody.class);
-
-    assertNotNull(responseBody);
-    assertNotNull(responseBody.getCode());
-    assertEquals(404, responseBody.getCode().intValue());
-    assertEquals(Message.ITEM_NOT_FOUND, responseBody.getMessage());
-  }
-
-  @Test
-  @Sql(value = {"/sql/insert_offer.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(value = {"/sql/insert_nodes_with_date_difference.sql"},
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
   @Sql(value = {"/sql/truncate_node.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  public void shouldReturnOkStatusAndOffer() throws Exception {
-    final String id = "863e1a7a-1304-42ae-943b-179184c077e3";
-
+  public void shouldReturnOkStatusAndOneOfTwoNodes() throws Exception {
     final MvcResult mvcResult = this.mockMvc.perform(get(
-        baseUrl + "/" + id))
+        baseUrl + "2022-06-21T12:00:00.000Z"))
       .andDo(print())
       .andExpect(status().isOk())
       .andReturn();
 
-    final GetNodesResponseBodyItem getNodesResponseBody = objectMapper.readValue(
-      mvcResult.getResponse().getContentAsString(), GetNodesResponseBodyItem.class);
+    final GetSalesResponseBody responseBody = objectMapper.readValue(
+      mvcResult.getResponse().getContentAsString(), GetSalesResponseBody.class);
 
-    assertNotNull(getNodesResponseBody);
-    assertEquals(getNodesResponseBody.getId(), id);
+    assertNotNull(responseBody);
+
+    final List<GetSalesResponseBodyItem> items = responseBody.getItems();
+
+    assertNotNull(items);
+    assertEquals(1, items.size());
+
+    final GetSalesResponseBodyItem item = items.get(0);
+
+    assertNotNull(item);
+    assertEquals(item.getName(), "first");
   }
 }

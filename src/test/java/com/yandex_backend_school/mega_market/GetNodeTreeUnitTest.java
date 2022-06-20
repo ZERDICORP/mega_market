@@ -3,11 +3,11 @@ package com.yandex_backend_school.mega_market;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
-import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,7 +43,7 @@ public class GetNodeTreeUnitTest {
   public void shouldFindNodesByParentAndDoSomeCalculations() {
     final Node node = new Node();
     node.setPrice(100);
-    node.setDate(new Date());
+    node.setDate(LocalDateTime.now());
     node.setType(Type.OFFER);
 
     final List<Node> nodes = new ArrayList<>();
@@ -56,7 +56,7 @@ public class GetNodeTreeUnitTest {
     Mockito.when(nodeRepository.findByParentId(parentNode.getId()))
       .thenReturn(nodes);
 
-    final GetNodesResponseBody responseBody = nodeService.getNodeTree(parentNode);
+    final GetNodesResponseBodyItem responseBody = nodeService.getNodeTree(parentNode);
     assertEquals(parentNode.getId(), responseBody.getId());
     assertEquals(node.getPrice(), responseBody.getPrice());
 
@@ -108,7 +108,7 @@ public class GetNodeTreeUnitTest {
     Mockito.when(nodeRepository.findById(parentNode.getId()))
       .thenReturn(Optional.of(parentNode));
 
-    final GetNodesResponseBody getNodesResponseBody = nodeService.getNodeTree(parentNode.getId());
+    final GetNodesResponseBodyItem getNodesResponseBody = nodeService.getNodeTree(parentNode.getId());
     assertNotNull(getNodesResponseBody);
     assertEquals(getNodesResponseBody.getId(), parentNode.getId());
 
@@ -150,7 +150,7 @@ public class GetNodeTreeUnitTest {
       .when(nodeService)
       .getNodeTree(ArgumentMatchers.eq(parentNode));
 
-    final GetNodesResponseBody getNodesResponseBody = nodeService.getNodeTree(parentNode.getId());
+    final GetNodesResponseBodyItem getNodesResponseBody = nodeService.getNodeTree(parentNode.getId());
     assertNull(getNodesResponseBody);
 
     Mockito.verify(nodeRepository, Mockito.times(1))

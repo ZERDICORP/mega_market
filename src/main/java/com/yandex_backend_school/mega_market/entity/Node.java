@@ -1,7 +1,7 @@
 package com.yandex_backend_school.mega_market.entity;
 
 import com.yandex_backend_school.mega_market.constant.Type;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -34,5 +34,5 @@ public class Node {
   @Column(nullable = false)
   private Type type;
   @Column(nullable = false)
-  private Date date;
+  private LocalDateTime date;
 }

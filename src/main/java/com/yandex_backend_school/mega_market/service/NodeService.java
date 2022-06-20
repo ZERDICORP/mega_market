@@ -3,10 +3,12 @@ package com.yandex_backend_school.mega_market.service;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
-import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBodyItem;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.transaction.Transactional;
@@ -26,6 +28,21 @@ public class NodeService {
   @Autowired
   public NodeService(NodeRepository nodeRepository) {
     this.nodeRepository = nodeRepository;
+  }
+
+  public GetSalesResponseBody getUpdatedIn24HoursOffers(LocalDateTime date) {
+    final List<GetSalesResponseBodyItem> offers = nodeRepository.findUpdatedIn24Hours(Type.OFFER, date)
+      .stream()
+      .map(n -> new GetSalesResponseBodyItem(
+        n.getId(),
+        n.getName(),
+        n.getType(),
+        n.getParentId(),
+        n.getDate(),
+        n.getPrice()))
+      .toList();
+
+    return new GetSalesResponseBody(offers);
   }
 
   public void deleteNodeTree(Node parentNode) {
@@ -50,12 +67,12 @@ public class NodeService {
     deleteNodeTree(parentNode);
   }
 
-  public GetNodesResponseBody getNodeTree(Node parentNode) {
-    final List<GetNodesResponseBody> nodes = nodeRepository.findByParentId(parentNode.getId())
+  public GetNodesResponseBodyItem getNodeTree(Node parentNode) {
+    final List<GetNodesResponseBodyItem> nodes = nodeRepository.findByParentId(parentNode.getId())
       .stream()
       .map(n -> {
         if (n.getType().equals(Type.OFFER)) {
-          return new GetNodesResponseBody(
+          return new GetNodesResponseBodyItem(
             n.getId(),
             n.getName(),
             n.getType(),
@@ -70,8 +87,8 @@ public class NodeService {
       .toList();
 
     nodes.stream()
-      .map(GetNodesResponseBody::getDate)
-      .max(Date::compareTo)
+      .map(GetNodesResponseBodyItem::getDate)
+      .max(LocalDateTime::compareTo)
       .ifPresent(parentNode::setDate);
 
     final AtomicInteger fullLength = new AtomicInteger(nodes.size());
@@ -90,7 +107,7 @@ public class NodeService {
       averagePrice = null;
     }
 
-    return new GetNodesResponseBody(
+    return new GetNodesResponseBodyItem(
       parentNode.getId(),
       parentNode.getName(),
       parentNode.getType(),
@@ -101,12 +118,12 @@ public class NodeService {
       priceSum);
   }
 
-  public GetNodesResponseBody getNodeTree(String parentId) {
+  public GetNodesResponseBodyItem getNodeTree(String parentId) {
     final Node parentNode = nodeRepository.findById(parentId)
       .orElseThrow(ItemNotFoundException::new);
 
     if (parentNode.getType().equals(Type.OFFER)) {
-      return new GetNodesResponseBody(
+      return new GetNodesResponseBodyItem(
         parentNode.getId(),
         parentNode.getName(),
         parentNode.getType(),

@@ -2,7 +2,7 @@ package com.yandex_backend_school.mega_market.pojo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.yandex_backend_school.mega_market.deserializer.DateDeserializer;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -27,5 +27,5 @@ public class ImportNodesRequestBody {
 
   @NotNull
   @JsonDeserialize(using = DateDeserializer.class)
-  private Date updateDate;
+  private LocalDateTime updateDate;
 }

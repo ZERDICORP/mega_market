@@ -6,7 +6,7 @@ import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import static org.junit.Assert.assertEquals;
@@ -73,7 +73,7 @@ public class ImportNodesIntegrationTest {
 
     final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
-    requestBody.setUpdateDate(new Date());
+    requestBody.setUpdateDate(LocalDateTime.now());
 
     makeRequestAndGetBadRequestStatusWithValidationFailedMessage(requestBody);
   }
@@ -89,7 +89,7 @@ public class ImportNodesIntegrationTest {
 
     final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
-    requestBody.setUpdateDate(new Date());
+    requestBody.setUpdateDate(LocalDateTime.now());
 
     makeRequestAndGetBadRequestStatusWithValidationFailedMessage(requestBody);
   }
@@ -105,7 +105,7 @@ public class ImportNodesIntegrationTest {
 
     final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
-    requestBody.setUpdateDate(new Date());
+    requestBody.setUpdateDate(LocalDateTime.now());
 
     makeRequestAndGetBadRequestStatusWithValidationFailedMessage(requestBody);
   }
@@ -137,7 +137,7 @@ public class ImportNodesIntegrationTest {
 
     final ImportNodesRequestBody requestBody = new ImportNodesRequestBody();
     requestBody.setItems(List.of(requestBodyItem));
-    requestBody.setUpdateDate(new Date());
+    requestBody.setUpdateDate(LocalDateTime.now());
 
     this.mockMvc.perform(post(baseUrl)
         .content(objectMapper.writeValueAsString(requestBody))

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author zerdicorp
@@ -13,15 +13,15 @@ import java.util.Date;
  * @created 18/06/2022 - 12:28 PM
  */
 
-public class DateDeserializer extends StdDeserializer<Date> {
+public class DateDeserializer extends StdDeserializer<LocalDateTime> {
   public DateDeserializer() {
-    super(Date.class);
+    super(LocalDateTime.class);
   }
 
   @Override
-  public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+  public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
     final String value = jsonParser.readValueAs(String.class);
     final Instant instant = Instant.parse(value);
-    return Date.from(instant);
+    return LocalDateTime.from(instant);
   }
 }

@@ -3,6 +3,7 @@ package com.yandex_backend_school.mega_market.exception;
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
 import javax.validation.ConstraintViolationException;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,7 +29,8 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler({
     MethodArgumentNotValidException.class,
-    ConstraintViolationException.class
+    ConstraintViolationException.class,
+    ConversionFailedException.class
   })
   @ResponseBody
   public ResponseEntity<Object> badRequestException(Exception e) {

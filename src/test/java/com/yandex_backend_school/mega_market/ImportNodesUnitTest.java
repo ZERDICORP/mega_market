@@ -5,7 +5,7 @@ import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,11 +36,9 @@ public class ImportNodesUnitTest {
     final ImportNodesRequestBodyItem requestBodyItem = Mockito.spy(new ImportNodesRequestBodyItem());
     requestBodyItem.setType(Type.CATEGORY);
 
-    final Date updateDate = new Date();
-
     final ImportNodesRequestBody requestBody = Mockito.spy(new ImportNodesRequestBody());
     requestBody.setItems(List.of(requestBodyItem));
-    requestBody.setUpdateDate(updateDate);
+    requestBody.setUpdateDate(LocalDateTime.now());
 
     nodeService.importNodes(requestBody);
 

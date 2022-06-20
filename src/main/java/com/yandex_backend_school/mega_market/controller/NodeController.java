@@ -1,18 +1,23 @@
 package com.yandex_backend_school.mega_market.controller;
 
 import com.yandex_backend_school.mega_market.constant.Regex;
-import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
+import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
+import com.yandex_backend_school.mega_market.pojo.GetSalesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.service.NodeService;
+import java.time.LocalDateTime;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -31,14 +36,19 @@ public class NodeController {
     this.nodeService = nodeService;
   }
 
+  @GetMapping("/sales")
+  public GetSalesResponseBody getSales(@NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                       @RequestParam LocalDateTime date) {
+    return nodeService.getUpdatedIn24HoursOffers(date);
+  }
+
   @DeleteMapping("/delete/{id}")
   public void deleteNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     nodeService.deleteNodeTree(id);
   }
 
-
   @GetMapping("/nodes/{id}")
-  public GetNodesResponseBody getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
+  public GetNodesResponseBodyItem getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     return nodeService.getNodeTree(id);
   }
 
