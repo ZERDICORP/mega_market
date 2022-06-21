@@ -2,6 +2,7 @@ package com.yandex_backend_school.mega_market.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yandex_backend_school.mega_market.constant.DateTimeTemplate;
 import com.yandex_backend_school.mega_market.constant.Type;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,7 +42,7 @@ public class Node {
   @Column(nullable = false)
   private Type type;
   @Column(nullable = false)
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeTemplate.RESPONSE_DATE_FORMAT)
   private LocalDateTime date;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parentId", referencedColumnName = "id")

@@ -23,12 +23,12 @@ public interface NodeRepository extends JpaRepository<Node, String> {
   List<Node> findUpdatedIn24Hours(Type type, LocalDateTime date);
 
   @Modifying
-  @Query(value = "UPDATE node n SET price = (" +
+  @Query(value = "UPDATE node n SET n.price = (" +
     "WITH RECURSIVE cte AS(" +
     "SELECT n.* FROM node n WHERE n.id = :nodeId " +
     "UNION ALL " +
     "SELECT n.* FROM node n INNER JOIN CTE c ON c.id = n.parent_id" +
     ") SELECT AVG(c.price) FROM cte c WHERE c.type = 1" +
     ") WHERE n.id = :nodeId", nativeQuery = true)
-  void countChildrenAveragePrice(String nodeId);
+  void updatePriceBasedOnChildren(String nodeId);
 }

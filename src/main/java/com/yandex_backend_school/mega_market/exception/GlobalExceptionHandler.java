@@ -23,9 +23,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({ItemNotFoundException.class})
   @ResponseBody
   public ResponseEntity<Object> itemNotFoundException(Exception e) {
-    return new ResponseEntity<>(
-      new ErrorResponseBody(HttpStatus.NOT_FOUND.value(), Message.ITEM_NOT_FOUND),
-      HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(new ErrorResponseBody(HttpStatus.NOT_FOUND.value(),
+      Message.ITEM_NOT_FOUND), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler({
@@ -36,8 +35,7 @@ public class GlobalExceptionHandler {
   })
   @ResponseBody
   public ResponseEntity<Object> badRequestException(Exception e) {
-    return new ResponseEntity<>(
-      new ErrorResponseBody(HttpStatus.BAD_REQUEST.value(), Message.VALIDATION_FAILED),
-      HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(new ErrorResponseBody(HttpStatus.BAD_REQUEST.value(),
+      Message.VALIDATION_FAILED), HttpStatus.BAD_REQUEST);
   }
 }

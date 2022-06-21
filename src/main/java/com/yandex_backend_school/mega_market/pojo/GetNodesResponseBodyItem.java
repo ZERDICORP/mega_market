@@ -1,6 +1,7 @@
 package com.yandex_backend_school.mega_market.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.yandex_backend_school.mega_market.constant.DateTimeTemplate;
 import com.yandex_backend_school.mega_market.constant.Type;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ public class GetNodesResponseBodyItem {
   private String name;
   private Type type;
   private String parentId;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeTemplate.RESPONSE_DATE_FORMAT)
   private LocalDateTime date;
   private Integer price;
 }

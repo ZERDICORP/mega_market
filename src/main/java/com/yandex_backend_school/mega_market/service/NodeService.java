@@ -34,7 +34,8 @@ public class NodeService {
   private final EntityManager entityManager;
 
   @Autowired
-  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository, EntityManager entityManager) {
+  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository,
+                     EntityManager entityManager) {
     this.nodeRepository = nodeRepository;
     this.nodeChangeRepository = nodeChangeRepository;
     this.entityManager = entityManager;
@@ -44,51 +45,40 @@ public class NodeService {
     final Node node = nodeRepository.findById(id)
       .orElseThrow(ItemNotFoundException::new);
 
-    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    final List<GetNodesResponseBodyItem> changes = nodeChangeRepository.findByNodeIdInDateRange(
-        id,
-        // The construct on the line below is just a replacement for
-        // the following construct:
-        // dateStart == null ? (...) : (...);
-        Optional.ofNullable(dateStart).orElse(LocalDateTime.parse(DateTimeTemplate.MIN, formatter)),
-        Optional.ofNullable(dateEnd).orElse(LocalDateTime.parse(DateTimeTemplate.MAX, formatter)))
-      .stream()
-      .map(c -> new GetNodesResponseBodyItem(
-        node.getId(),
-        node.getName(),
-        node.getType(),
-        node.getParentId(),
-        c.getDate(),
-        c.getPrice()))
+    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeTemplate.DATABASE_DATE_FORMAT);
+    dateStart = Optional.ofNullable(dateStart)
+      .orElse(LocalDateTime.parse(DateTimeTemplate.MIN, formatter));
+    dateEnd = Optional.ofNullable(dateEnd)
+      .orElse(LocalDateTime.parse(DateTimeTemplate.MAX, formatter));
+
+    final List<GetNodesResponseBodyItem> items = nodeChangeRepository.findByNodeIdInDateRange(id,
+        dateStart, dateEnd).stream()
+      .map(nc -> new GetNodesResponseBodyItem(node.getId(), node.getName(), node.getType(), node.getParentId(),
+        nc.getDate(), nc.getPrice()))
       .toList();
 
-    return new GetNodesResponseBody(changes);
+    return new GetNodesResponseBody(items);
   }
 
   public GetNodesResponseBody getUpdatedIn24HoursOffers(LocalDateTime date) {
-    final List<GetNodesResponseBodyItem> offers = nodeRepository.findUpdatedIn24Hours(Type.OFFER, date)
+    final List<GetNodesResponseBodyItem> items = nodeRepository.findUpdatedIn24Hours(Type.OFFER, date)
       .stream()
-      .map(n -> new GetNodesResponseBodyItem(
-        n.getId(),
-        n.getName(),
-        n.getType(),
-        n.getParentId(),
-        n.getDate(),
+      .map(n -> new GetNodesResponseBodyItem(n.getId(), n.getName(), n.getType(), n.getParentId(), n.getDate(),
         n.getPrice()))
       .toList();
 
-    return new GetNodesResponseBody(offers);
+    return new GetNodesResponseBody(items);
   }
 
   @Transactional
-  public void deleteNode(String parentId) {
-    final Node parentNode = nodeRepository.findById(parentId)
+  public void deleteNode(String id) {
+    final Node node = nodeRepository.findById(id)
       .orElseThrow(ItemNotFoundException::new);
 
-    nodeRepository.delete(parentNode);
+    nodeRepository.delete(node);
     nodeRepository.flush();
 
-    updateParentNode(parentNode.getParentNode(), LocalDateTime.now());
+    updateParentNode(node.getParentNode(), LocalDateTime.now());
   }
 
   public Node getNode(String parentId) {
@@ -114,13 +104,8 @@ public class NodeService {
         .orElse(null);
     }
 
-    final Node node = new Node(
-      item.getId(),
-      item.getName(),
-      item.getPrice(),
-      item.getType(),
-      updateDate,
-      parentNode);
+    final Node node = new Node(item.getId(), item.getName(), item.getPrice(), item.getType(),
+      updateDate, parentNode);
 
     nodeRepository.saveAndFlush(node);
 
@@ -128,7 +113,6 @@ public class NodeService {
       // We save the state of the node (price, date) for the
       // subsequent collection of statistics.
       nodeChangeRepository.saveAndFlush(new NodeChange(node, updateDate, item.getPrice()));
-
       updateParentNode(parentNode, updateDate);
       return;
     }
@@ -145,7 +129,7 @@ public class NodeService {
 
     parentNode.setDate(updateDate);
     nodeRepository.save(parentNode);
-    nodeRepository.countChildrenAveragePrice(parentNode.getId());
+    nodeRepository.updatePriceBasedOnChildren(parentNode.getId());
     nodeRepository.flush();
 
     nodeChangeRepository.saveAndFlush(new NodeChange(parentNode, updateDate, parentNode.getPrice()));
