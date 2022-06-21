@@ -17,8 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,7 +58,7 @@ public class NodeService {
         node.getId(),
         node.getName(),
         node.getType(),
-        node.getParentNode().getId(),
+        node.getParentNode() == null ? null : node.getParentNode().getId(),
         c.getDate(),
         c.getPrice()))
       .toList();
@@ -151,11 +149,11 @@ public class NodeService {
       return;
     }
 
-    // Calculate the new average price of all child nodes
-    // recursively.
-    collectChildrenData(parentNode);
+    parentNode.setDate(updateDate);
+    nodeRepository.save(parentNode);
+    nodeRepository.countChildrenAveragePrice(parentNode.getId());
+    nodeRepository.flush();
 
-    nodeRepository.saveAndFlush(parentNode);
     nodeChangeRepository.saveAndFlush(new NodeChange(
       updateDate,
       parentNode,
@@ -164,47 +162,5 @@ public class NodeService {
     if (parentNode.getParentNode() != null) {
       updateParentNode(parentNode.getParentNode(), updateDate);
     }
-  }
-
-  public void collectChildrenData(Node parentNode) {
-    final Set<Node> children = parentNode.getChildren();
-    final AtomicInteger allChildrenNumber = new AtomicInteger(children.size());
-    // We calculate the sum of the prices of all children to find
-    // the average price (it must be set as the price of the
-    // parent node).
-    final int childrenPriceSum = children.stream()
-      .mapToInt(n -> {
-        if (n.getType().equals(Type.CATEGORY)) {
-          // If the child node is a category, you need to collect data
-          // for it in the same way as for the parent node.
-          collectChildrenData(n);
-          // Below is a very important line. We do not increment
-          // allChildrenNumber, but add to it the number of
-          // children of the current child (which is the category) - 1
-          // (subtract the category, since it is not counted). This
-          // is necessary so that the parent node, when calculating
-          // the average price, takes into account not only the number
-          // of its children, but also the total number of children
-          // (own children + children of subcategories + children of
-          // subcategories of subcategories, etc).
-          allChildrenNumber.addAndGet(n.getChildren().size() - 1);
-          // We don't need the price of this category (because its
-          // price is the average price of its children), but the
-          // sum of the prices of its children.
-          return n.getChildrenPriceSum();
-        }
-        return n.getPrice();
-      })
-      .reduce(0, Integer::sum);
-
-    Integer averageChildrenPrice = childrenPriceSum / Math.max(1, allChildrenNumber.get());
-    // If the number of all children is zero, then according to the
-    // agreement with OpenAPI, we must set the value to NULL.
-    if (allChildrenNumber.get() == 0) {
-      averageChildrenPrice = null;
-    }
-
-    parentNode.setPrice(averageChildrenPrice);
-    parentNode.setChildrenPriceSum(childrenPriceSum);
   }
 }
