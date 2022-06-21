@@ -11,7 +11,6 @@ import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
 import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -58,7 +57,7 @@ public class NodeService {
         node.getId(),
         node.getName(),
         node.getType(),
-        node.getParentNode() == null ? null : node.getParentNode().getId(),
+        node.getParentId(),
         c.getDate(),
         c.getPrice()))
       .toList();
@@ -73,7 +72,7 @@ public class NodeService {
         n.getId(),
         n.getName(),
         n.getType(),
-        n.getParentNode().getId(),
+        n.getParentId(),
         n.getDate(),
         n.getPrice()))
       .toList();
@@ -101,12 +100,10 @@ public class NodeService {
   public void importNodes(ImportNodesRequestBody requestBody) {
     final LocalDateTime updateDate = requestBody.getUpdateDate();
     final List<ImportNodesRequestBodyItem> items = requestBody.getItems();
-    final LocalDateTime start = LocalDateTime.now();
 
     // Sorting items so that categories come first, then offers.
     items.sort(Comparator.comparingInt(n -> n.getType().ordinal()));
-    items.forEach(i -> saveNode(i,
-      updateDate.plus(Duration.between(LocalDateTime.now(), start))));
+    items.forEach(i -> saveNode(i, updateDate));
   }
 
   public void saveNode(ImportNodesRequestBodyItem item, LocalDateTime updateDate) {
@@ -130,10 +127,7 @@ public class NodeService {
     if (item.getType().equals(Type.OFFER)) {
       // We save the state of the node (price, date) for the
       // subsequent collection of statistics.
-      nodeChangeRepository.saveAndFlush(new NodeChange(
-        updateDate,
-        node,
-        item.getPrice()));
+      nodeChangeRepository.saveAndFlush(new NodeChange(node, updateDate, item.getPrice()));
 
       updateParentNode(parentNode, updateDate);
       return;
@@ -154,13 +148,8 @@ public class NodeService {
     nodeRepository.countChildrenAveragePrice(parentNode.getId());
     nodeRepository.flush();
 
-    nodeChangeRepository.saveAndFlush(new NodeChange(
-      updateDate,
-      parentNode,
-      Optional.ofNullable(parentNode.getPrice()).orElse(0)));
+    nodeChangeRepository.saveAndFlush(new NodeChange(parentNode, updateDate, parentNode.getPrice()));
 
-    if (parentNode.getParentNode() != null) {
-      updateParentNode(parentNode.getParentNode(), updateDate);
-    }
+    updateParentNode(parentNode.getParentNode(), updateDate);
   }
 }
