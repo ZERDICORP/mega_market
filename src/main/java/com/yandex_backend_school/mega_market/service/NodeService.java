@@ -5,23 +5,24 @@ import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.entity.NodeChange;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBodyItem;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
 import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author zerdicorp
@@ -33,11 +34,13 @@ import org.springframework.stereotype.Service;
 public class NodeService {
   private final NodeRepository nodeRepository;
   private final NodeChangeRepository nodeChangeRepository;
+  private final EntityManager entityManager;
 
   @Autowired
-  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository) {
+  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository, EntityManager entityManager) {
     this.nodeRepository = nodeRepository;
     this.nodeChangeRepository = nodeChangeRepository;
+    this.entityManager = entityManager;
   }
 
   public GetNodesResponseBody getNodeChangeStatistics(String id, LocalDateTime dateStart, LocalDateTime dateEnd) {
@@ -49,7 +52,7 @@ public class NodeService {
         id,
         // The construct on the line below is just a replacement for
         // the following construct:
-        // dateStart == null ? LocalDateTime.parse(DateTimeTemplate.MIN, formatter) : dateStart;
+        // dateStart == null ? (...) : (...);
         Optional.ofNullable(dateStart).orElse(LocalDateTime.parse(DateTimeTemplate.MIN, formatter)),
         Optional.ofNullable(dateEnd).orElse(LocalDateTime.parse(DateTimeTemplate.MAX, formatter)))
       .stream()
@@ -57,7 +60,7 @@ public class NodeService {
         node.getId(),
         node.getName(),
         node.getType(),
-        node.getParentId(),
+        node.getParentNode().getId(),
         c.getDate(),
         c.getPrice()))
       .toList();
@@ -72,7 +75,7 @@ public class NodeService {
         n.getId(),
         n.getName(),
         n.getType(),
-        n.getParentId(),
+        n.getParentNode().getId(),
         n.getDate(),
         n.getPrice()))
       .toList();
@@ -80,80 +83,101 @@ public class NodeService {
     return new GetNodesResponseBody(offers);
   }
 
-  public void deleteNode(Node parentNode) {
-    final List<Node> deletedNodes = nodeRepository.deleteByParentId(parentNode.getId());
-    // We collect all the id in the list so that later we can
-    // delete the node changes in the batch using them.
-    final List<String> deletedNodeIds = Stream.concat(deletedNodes.stream(), Stream.of(parentNode))
-      .map(Node::getId)
-      .toList();
-
-    // For each child node, if it is a category, we must do
-    // the same as for the current parent node.
-    deletedNodes
-      .stream()
-      .filter(n -> n.getType().equals(Type.CATEGORY))
-      .forEach(this::deleteNode);
-
-    nodeChangeRepository.deleteAllByNodeIdInBatch(deletedNodeIds);
-    nodeRepository.delete(parentNode);
-  }
-
   @Transactional
   public void deleteNode(String parentId) {
     final Node parentNode = nodeRepository.findById(parentId)
       .orElseThrow(ItemNotFoundException::new);
 
-    // If the node is an offer, then by definition it has no
-    // children, so just delete it.
-    if (parentNode.getType().equals(Type.OFFER)) {
-      nodeRepository.delete(parentNode);
+    nodeRepository.delete(parentNode);
+    nodeRepository.flush();
+
+    updateParentNode(parentNode.getParentNode(), LocalDateTime.now());
+  }
+
+  public Node getNode(String parentId) {
+    return nodeRepository.findById(parentId)
+      .orElseThrow(ItemNotFoundException::new);
+  }
+
+  @Transactional
+  public void importNodes(ImportNodesRequestBody requestBody) {
+    final LocalDateTime updateDate = requestBody.getUpdateDate();
+    final List<ImportNodesRequestBodyItem> items = requestBody.getItems();
+    final LocalDateTime start = LocalDateTime.now();
+
+    // Sorting items so that categories come first, then offers.
+    items.sort(Comparator.comparingInt(n -> n.getType().ordinal()));
+    items.forEach(i -> saveNode(i,
+      updateDate.plus(Duration.between(LocalDateTime.now(), start))));
+  }
+
+  public void saveNode(ImportNodesRequestBodyItem item, LocalDateTime updateDate) {
+    Node parentNode = null;
+    if (item.getParentId() != null) {
+      entityManager.clear();
+      parentNode = nodeRepository.findById(item.getParentId())
+        .orElse(null);
+    }
+
+    final Node node = new Node(
+      item.getId(),
+      item.getName(),
+      item.getPrice(),
+      item.getType(),
+      updateDate,
+      parentNode);
+
+    nodeRepository.saveAndFlush(node);
+
+    if (item.getType().equals(Type.OFFER)) {
+      // We save the state of the node (price, date) for the
+      // subsequent collection of statistics.
+      nodeChangeRepository.saveAndFlush(new NodeChange(
+        updateDate,
+        node,
+        item.getPrice()));
+
+      updateParentNode(parentNode, updateDate);
       return;
     }
 
-    // Otherwise, if the node is a category, we need to delete all
-    // of its children, as well as the children of the children (if
-    // the latter are categories).
-    deleteNode(parentNode);
+    entityManager.clear();
+    nodeRepository.findById(node.getId())
+      .ifPresent(n -> updateParentNode(n, updateDate));
   }
 
-  public GetNodeResponseBody getNode(Node parentNode) {
-    final List<GetNodeResponseBody> nodes = nodeRepository.findByParentId(parentNode.getId())
-      .stream()
-      .map(n -> {
-        // If the child node is an offer, simply return it.
-        if (n.getType().equals(Type.OFFER)) {
-          return new GetNodeResponseBody(
-            n.getId(),
-            n.getName(),
-            n.getType(),
-            n.getParentId(),
-            n.getDate(),
-            n.getPrice(),
-            null);
-        }
+  public void updateParentNode(Node parentNode, LocalDateTime updateDate) {
+    if (parentNode == null) {
+      return;
+    }
 
-        // If the child is a category, we need to find its children.
-        return getNode(n);
-      })
-      .toList();
+    // Calculate the new average price of all child nodes
+    // recursively.
+    collectChildrenData(parentNode);
 
-    // We find the child with the maximum date of the last update
-    // and set this date to the parent node, since the update of
-    // the child is also the update of the parent node.
-    nodes.stream()
-      .map(GetNodeResponseBody::getDate)
-      .max(LocalDateTime::compareTo)
-      .ifPresent(parentNode::setDate);
+    nodeRepository.saveAndFlush(parentNode);
+    nodeChangeRepository.saveAndFlush(new NodeChange(
+      updateDate,
+      parentNode,
+      Optional.ofNullable(parentNode.getPrice()).orElse(0)));
 
-    final AtomicInteger allChildrenNumber = new AtomicInteger(nodes.size());
+    if (parentNode.getParentNode() != null) {
+      updateParentNode(parentNode.getParentNode(), updateDate);
+    }
+  }
 
+  public void collectChildrenData(Node parentNode) {
+    final Set<Node> children = parentNode.getChildren();
+    final AtomicInteger allChildrenNumber = new AtomicInteger(children.size());
     // We calculate the sum of the prices of all children to find
     // the average price (it must be set as the price of the
     // parent node).
-    final int priceSum = nodes.stream()
+    final int childrenPriceSum = children.stream()
       .mapToInt(n -> {
         if (n.getType().equals(Type.CATEGORY)) {
+          // If the child node is a category, you need to collect data
+          // for it in the same way as for the parent node.
+          collectChildrenData(n);
           // Below is a very important line. We do not increment
           // allChildrenNumber, but add to it the number of
           // children of the current child (which is the category) - 1
@@ -173,85 +197,14 @@ public class NodeService {
       })
       .reduce(0, Integer::sum);
 
-    Integer averagePrice = priceSum / Math.max(1, allChildrenNumber.get());
+    Integer averageChildrenPrice = childrenPriceSum / Math.max(1, allChildrenNumber.get());
     // If the number of all children is zero, then according to the
     // agreement with OpenAPI, we must set the value to NULL.
     if (allChildrenNumber.get() == 0) {
-      averagePrice = null;
+      averageChildrenPrice = null;
     }
 
-    return new GetNodeResponseBody(
-      parentNode.getId(),
-      parentNode.getName(),
-      parentNode.getType(),
-      parentNode.getParentId(),
-      parentNode.getDate(),
-      averagePrice,
-      nodes,
-      priceSum);
-  }
-
-  public GetNodeResponseBody getNode(String parentId) {
-    final Node parentNode = nodeRepository.findById(parentId)
-      .orElseThrow(ItemNotFoundException::new);
-
-    // If the node is an offer, then we do not need to look for
-    // its children, so we simply return it.
-    if (parentNode.getType().equals(Type.OFFER)) {
-      return new GetNodeResponseBody(
-        parentNode.getId(),
-        parentNode.getName(),
-        parentNode.getType(),
-        parentNode.getParentId(),
-        parentNode.getDate(),
-        parentNode.getPrice(),
-        null);
-    }
-
-    // If the node is a category, then we need to look for possible
-    // children for it, since we need to calculate their average
-    // price, and if one of the children is also a category, do the
-    // same for this child.
-    return getNode(parentNode);
-  }
-
-  public void importNodes(ImportNodesRequestBody requestBody) {
-    final LocalDateTime updateDate = requestBody.getUpdateDate();
-    final List<ImportNodesRequestBodyItem> items = requestBody.getItems();
-
-    // Sorting items so that categories come first, then offers.
-    items.sort(Comparator.comparingInt(n -> n.getType().ordinal()));
-
-    items.forEach(n -> {
-      nodeRepository.save(new Node(
-        n.getId(),
-        n.getName(),
-        n.getParentId(),
-        n.getPrice(),
-        n.getType(),
-        updateDate));
-
-      if (n.getType().equals(Type.OFFER)) {
-        // We save the state of the node (price, date) for the
-        // subsequent collection of statistics.
-        nodeChangeRepository.save(new NodeChange(
-          n.getId(),
-          updateDate,
-          n.getPrice()));
-
-        // Since we have changed/created a node, we must find the
-        // parent node and save the new state for it.
-        nodeRepository.findById(n.getParentId())
-          .ifPresent(pn -> nodeChangeRepository.save(new NodeChange(
-            pn.getId(),
-            updateDate,
-            // Since we are calculating the state of the category,
-            // we must recalculate its price (remember, the price of
-            // a category is the average price of all its children),
-            // which means we need to call the getNode method, which
-            // recursively calculates the price for the categories.
-            getNode(pn).getPrice())));
-      }
-    });
+    parentNode.setPrice(averageChildrenPrice);
+    parentNode.setChildrenPriceSum(childrenPriceSum);
   }
 }

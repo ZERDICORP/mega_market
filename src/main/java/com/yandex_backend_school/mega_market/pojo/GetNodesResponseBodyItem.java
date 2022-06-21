@@ -19,11 +19,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetNodesResponseBodyItem {
-  protected String id;
-  protected String name;
-  protected Type type;
-  protected String parentId;
+  private String id;
+  private String name;
+  private Type type;
+  private String parentId;
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-  protected LocalDateTime date;
-  protected Integer price;
+  private LocalDateTime date;
+  private Integer price;
 }

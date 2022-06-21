@@ -16,9 +16,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NodeRepository extends JpaRepository<Node, String> {
-  List<Node> findByParentId(String parentId);
+//  List<Node> findByParentId(String parentId);
 
-  List<Node> deleteByParentId(String parentId);
+//  List<Node> deleteByParentId(String parentId);
 
   @Query(value = "SELECT n.* FROM node n WHERE n.type = :type " +
     "AND n.date >= CAST(:date as DATETIME) - INTERVAL 24 HOUR " +

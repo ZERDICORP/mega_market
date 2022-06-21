@@ -1,7 +1,7 @@
 package com.yandex_backend_school.mega_market.controller;
 
 import com.yandex_backend_school.mega_market.constant.Regex;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
+import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.pojo.GetNodesResponseBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.service.NodeService;
@@ -56,7 +56,7 @@ public class NodeController {
   }
 
   @GetMapping("/nodes/{id}")
-  public GetNodeResponseBody getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
+  public Node getNode(@Pattern(regexp = Regex.UUID_ONLY) @PathVariable String id) {
     return nodeService.getNode(id);
   }
 

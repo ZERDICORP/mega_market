@@ -1,15 +1,15 @@
 package com.yandex_backend_school.mega_market.entity;
 
 import java.time.LocalDateTime;
-import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import lombok.AllArgsConstructor;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.PrimaryKeyJoinColumn;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * @author zerdicorp
@@ -18,21 +18,27 @@ import lombok.ToString;
  */
 
 @Entity(name = "node_change")
-@IdClass(NodeChangeKey.class)
 @Getter
 @Setter
-@ToString
-@AllArgsConstructor
 @NoArgsConstructor
 public class NodeChange {
-  @Id
-  @Column(nullable = false)
-  private String nodeId;
-
-  @Id
-  @Column(nullable = false)
-  private LocalDateTime date;
-
-  @Column(nullable = false)
+  @EmbeddedId
+  private NodeChangeKey id;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @PrimaryKeyJoinColumn(name = "nodeId", referencedColumnName = "id")
+  @MapsId("nodeId")
+  private Node node;
   private Integer price;
+
+  public NodeChange(LocalDateTime date, Node node, Integer price) {
+    id = new NodeChangeKey();
+    id.setDate(date);
+
+    this.node = node;
+    this.price = price;
+  }
+
+  public LocalDateTime getDate() {
+    return id.getDate();
+  }
 }

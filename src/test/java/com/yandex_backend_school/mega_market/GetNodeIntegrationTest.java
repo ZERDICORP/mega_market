@@ -3,7 +3,6 @@ package com.yandex_backend_school.mega_market;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yandex_backend_school.mega_market.constant.Message;
 import com.yandex_backend_school.mega_market.pojo.ErrorResponseBody;
-import com.yandex_backend_school.mega_market.pojo.GetNodeResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
