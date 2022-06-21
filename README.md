@@ -45,7 +45,7 @@ OS name: "linux", version: "5.4.0-26-generic", arch: "amd64", family: "unix"
 
 #### 2. Clone this repository
 ```
-git clone https://github.com/ZERDICORP/mega_market.git
+$ git clone https://github.com/ZERDICORP/mega_market.git
 ```
 
 #### 3. Creating and configuring mariadb docker container
