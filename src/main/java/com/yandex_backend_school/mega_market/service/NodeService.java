@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class NodeService {
   private final NodeRepository nodeRepository;
   private final NodeChangeRepository nodeChangeRepository;
-  private final EntityManager entityManager;
 
   @Autowired
-  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository,
-                     EntityManager entityManager) {
+  public NodeService(NodeRepository nodeRepository, NodeChangeRepository nodeChangeRepository) {
     this.nodeRepository = nodeRepository;
     this.nodeChangeRepository = nodeChangeRepository;
-    this.entityManager = entityManager;
   }
 
   public GetNodesResponseBody getNodeChangeStatistics(String id, LocalDateTime dateStart, LocalDateTime dateEnd) {
@@ -46,8 +42,12 @@ public class NodeService {
       .orElseThrow(ItemNotFoundException::new);
 
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeTemplate.DATABASE_DATE_FORMAT);
+    // If dateStart is null, replace it with the minimum date
+    // value (thus searching from the lower bound).
     dateStart = Optional.ofNullable(dateStart)
       .orElse(LocalDateTime.parse(DateTimeTemplate.MIN, formatter));
+    // If dateEnd is null, replace it with the maximum date
+    // value (thus searching from the upper bound).
     dateEnd = Optional.ofNullable(dateEnd)
       .orElse(LocalDateTime.parse(DateTimeTemplate.MAX, formatter));
 
@@ -78,11 +78,13 @@ public class NodeService {
     nodeRepository.delete(node);
     nodeRepository.flush();
 
-    updateParentNode(node.getParentNode(), LocalDateTime.now());
+    // After deleting any node, you need to update the state
+    // of the parent (price, last update date).
+    updateCategory(node.getParentNode(), LocalDateTime.now());
   }
 
-  public Node getNode(String parentId) {
-    return nodeRepository.findById(parentId)
+  public Node getNode(String id) {
+    return nodeRepository.findById(id)
       .orElseThrow(ItemNotFoundException::new);
   }
 
@@ -99,7 +101,6 @@ public class NodeService {
   public void saveNode(ImportNodesRequestBodyItem item, LocalDateTime updateDate) {
     Node parentNode = null;
     if (item.getParentId() != null) {
-      entityManager.clear();
       parentNode = nodeRepository.findById(item.getParentId())
         .orElse(null);
     }
@@ -110,30 +111,37 @@ public class NodeService {
     nodeRepository.saveAndFlush(node);
 
     if (item.getType().equals(Type.OFFER)) {
-      // We save the state of the node (price, date) for the
-      // subsequent collection of statistics.
+      // We save the state of the node (price, date) for statistics.
       nodeChangeRepository.saveAndFlush(new NodeChange(node, updateDate, item.getPrice()));
-      updateParentNode(parentNode, updateDate);
+      updateCategory(parentNode, updateDate);
       return;
     }
 
-    entityManager.clear();
-    nodeRepository.findById(node.getId())
-      .ifPresent(n -> updateParentNode(n, updateDate));
+    updateCategory(node, updateDate);
   }
 
-  public void updateParentNode(Node parentNode, LocalDateTime updateDate) {
-    if (parentNode == null) {
+  public void updateCategory(Node node, LocalDateTime updateDate) {
+    if (node == null) {
       return;
     }
 
-    parentNode.setDate(updateDate);
-    nodeRepository.save(parentNode);
-    nodeRepository.updatePriceBasedOnChildren(parentNode.getId());
+    node.setDate(updateDate);
+    nodeRepository.save(node);
+    nodeRepository.updatePriceBasedOnChildren(node.getId());
     nodeRepository.flush();
 
-    nodeChangeRepository.saveAndFlush(new NodeChange(parentNode, updateDate, parentNode.getPrice()));
+    nodeChangeRepository.saveAndFlush(new NodeChange(node, updateDate, node.getPrice()));
 
-    updateParentNode(parentNode.getParentNode(), updateDate);
+    // Since the category structure is cascading in nature (in our
+    // case, the price of each category is the average of the
+    // prices of all child offers), updating one of them, you need
+    // to recursively go up and update each subsequent parent until
+    // we hit null.
+    //
+    // By the way, this is somewhat similar to the wave effect, but
+    // in one-dimensional space and with the restriction that you
+    // can only move in one direction (we move up at the expense of
+    // parentNode).
+    updateCategory(node.getParentNode(), updateDate);
   }
 }

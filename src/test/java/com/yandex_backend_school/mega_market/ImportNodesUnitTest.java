@@ -1,24 +1,21 @@
 package com.yandex_backend_school.mega_market;
 
-import com.yandex_backend_school.mega_market.constant.Type;
-import com.yandex_backend_school.mega_market.entity.Node;
-import com.yandex_backend_school.mega_market.entity.NodeChange;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBody;
 import com.yandex_backend_school.mega_market.pojo.ImportNodesRequestBodyItem;
-import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
+import com.yandex_backend_school.mega_market.util.SpiedArrayList;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -30,31 +27,30 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ImportNodesUnitTest {
-  @Autowired
+  @SpyBean
   private NodeService nodeService;
 
   @MockBean
   private NodeRepository nodeRepository;
 
-  @MockBean
-  private NodeChangeRepository nodeChangeRepository;
-
   @Test
-  public void shouldSaveNodeThenSaveNodeChangeBecauseNodeTypeIsOffer() {
+  public void shouldSortItemsByTypeAndCallSaveNodeMethodForEachElement() {
     final ImportNodesRequestBodyItem requestBodyItem = Mockito.spy(new ImportNodesRequestBodyItem());
-    requestBodyItem.setType(Type.OFFER);
 
-    final List<ImportNodesRequestBodyItem> items = new ArrayList<>();
+    final List<ImportNodesRequestBodyItem> items = Mockito.spy(new SpiedArrayList<>());
     items.add(requestBodyItem);
+
+    final LocalDateTime updateDate = LocalDateTime.now();
 
     final ImportNodesRequestBody requestBody = Mockito.spy(new ImportNodesRequestBody());
     requestBody.setItems(items);
-    requestBody.setUpdateDate(LocalDateTime.now());
+    requestBody.setUpdateDate(updateDate);
 
-    final Node parentNode = Mockito.spy(new Node());
-
-    Mockito.when(nodeRepository.findById(ArgumentMatchers.eq(requestBodyItem.getParentId())))
-      .thenReturn(Optional.of(parentNode));
+    Mockito.doNothing()
+      .when(nodeService)
+      .saveNode(
+        ArgumentMatchers.eq(requestBodyItem),
+        ArgumentMatchers.eq(updateDate));
 
     nodeService.importNodes(requestBody);
 
@@ -64,78 +60,15 @@ public class ImportNodesUnitTest {
     Mockito.verify(requestBody, Mockito.times(1))
       .getItems();
 
-    Mockito.verify(requestBodyItem, Mockito.times(2))
-      .getId();
+    Mockito.verify(items, Mockito.times(1))
+      .sort(ArgumentMatchers.any(Comparator.class));
 
-    Mockito.verify(requestBodyItem, Mockito.times(1))
-      .getName();
+    Mockito.verify(items, Mockito.times(1))
+      .forEach(ArgumentMatchers.any(Consumer.class));
 
-    Mockito.verify(requestBodyItem, Mockito.times(3))
-      .getParentId();
-
-    Mockito.verify(requestBodyItem, Mockito.times(2))
-      .getPrice();
-
-    Mockito.verify(requestBodyItem, Mockito.times(2))
-      .getType();
-
-    Mockito.verify(nodeRepository, Mockito.times(1))
-      .save(ArgumentMatchers.any(Node.class));
-
-    Mockito.verify(nodeRepository, Mockito.times(1))
-      .findById(ArgumentMatchers.eq(requestBodyItem.getParentId()));
-
-    Mockito.verify(nodeChangeRepository, Mockito.times(2))
-      .save(ArgumentMatchers.any(NodeChange.class));
-  }
-
-  @Test
-  public void shouldSaveNodeWithoutSavingNodeChangeBecauseNodeTypeIsCategory() {
-    final ImportNodesRequestBodyItem requestBodyItem = Mockito.spy(new ImportNodesRequestBodyItem());
-    requestBodyItem.setType(Type.CATEGORY);
-
-    final List<ImportNodesRequestBodyItem> items = new ArrayList<>();
-    items.add(requestBodyItem);
-
-    final ImportNodesRequestBody requestBody = Mockito.spy(new ImportNodesRequestBody());
-    requestBody.setItems(items);
-    requestBody.setUpdateDate(LocalDateTime.now());
-
-    final Node parentNode = Mockito.spy(new Node());
-
-    Mockito.when(nodeRepository.findById(ArgumentMatchers.eq(requestBodyItem.getParentId())))
-      .thenReturn(Optional.of(parentNode));
-
-    nodeService.importNodes(requestBody);
-
-    Mockito.verify(requestBody, Mockito.times(1))
-      .getUpdateDate();
-
-    Mockito.verify(requestBody, Mockito.times(1))
-      .getItems();
-
-    Mockito.verify(requestBodyItem, Mockito.times(1))
-      .getId();
-
-    Mockito.verify(requestBodyItem, Mockito.times(1))
-      .getName();
-
-    Mockito.verify(requestBodyItem, Mockito.times(2))
-      .getParentId();
-
-    Mockito.verify(requestBodyItem, Mockito.times(1))
-      .getPrice();
-
-    Mockito.verify(requestBodyItem, Mockito.times(2))
-      .getType();
-
-    Mockito.verify(nodeRepository, Mockito.times(1))
-      .save(ArgumentMatchers.any(Node.class));
-
-    Mockito.verify(nodeRepository, Mockito.times(0))
-      .findById(ArgumentMatchers.eq(requestBodyItem.getParentId()));
-
-    Mockito.verify(nodeChangeRepository, Mockito.times(0))
-      .save(ArgumentMatchers.any(NodeChange.class));
+    Mockito.verify(nodeService, Mockito.times(1))
+      .saveNode(
+        ArgumentMatchers.eq(requestBodyItem),
+        ArgumentMatchers.eq(updateDate));
   }
 }

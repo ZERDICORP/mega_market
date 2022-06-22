@@ -3,9 +3,9 @@ package com.yandex_backend_school.mega_market;
 import com.yandex_backend_school.mega_market.constant.Type;
 import com.yandex_backend_school.mega_market.entity.Node;
 import com.yandex_backend_school.mega_market.exception.ItemNotFoundException;
-import com.yandex_backend_school.mega_market.repository.NodeChangeRepository;
 import com.yandex_backend_school.mega_market.repository.NodeRepository;
 import com.yandex_backend_school.mega_market.service.NodeService;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import static org.junit.Assert.assertThrows;
@@ -33,101 +33,49 @@ public class DeleteNodeUnitTest {
   @MockBean
   private NodeRepository nodeRepository;
 
-  @MockBean
-  private NodeChangeRepository nodeChangeRepository;
-
-  @Test
-  public void shouldDeleteByParentIdAndThenDeleteParentNodeAndDeleteNodeChangesByNodeIdInBatch() {
-//    final Node parentNode = Mockito.spy(new Node());
-//    parentNode.setId(UUID.randomUUID().toString());
-//
-//    Mockito.when(nodeRepository.deleteByParentId(parentNode.getId()))
-//      .thenReturn(new ArrayList<>());
-//
-//    nodeService.deleteNode(parentNode);
-//
-//    Mockito.verify(parentNode, Mockito.times(3))
-//      .getId();
-//
-//    Mockito.verify(nodeRepository, Mockito.times(1))
-//      .deleteByParentId(ArgumentMatchers.eq(parentNode.getId()));
-//
-//    Mockito.verify(nodeRepository, Mockito.times(1))
-//      .delete(ArgumentMatchers.eq(parentNode));
-//
-//    Mockito.verify(nodeChangeRepository, Mockito.times(1))
-//      .deleteAllByNodeIdInBatch(ArgumentMatchers.anyList());
-  }
-
   @Test
   public void shouldThrowExceptionBecauseFindByIdMethodReturnsNull() {
     assertThrows(ItemNotFoundException.class, () -> {
-      final Node parentNode = Mockito.spy(new Node());
-      parentNode.setId(UUID.randomUUID().toString());
-      parentNode.setType(Type.OFFER);
+      final Node node = Mockito.spy(new Node());
+      node.setId(UUID.randomUUID().toString());
+      node.setType(Type.CATEGORY);
 
-      Mockito.when(nodeRepository.findById(parentNode.getId()))
+      Mockito.when(nodeRepository.findById(node.getId()))
         .thenReturn(Optional.empty());
 
-      nodeService.deleteNode(parentNode.getId());
+      nodeService.deleteNode(node.getId());
     });
   }
 
   @Test
-  public void shouldFindNodeAndReturnItBecauseNodeIsOffer() {
-//    final Node parentNode = Mockito.spy(new Node());
-//    parentNode.setId(UUID.randomUUID().toString());
-//    parentNode.setType(Type.OFFER);
-//
-//    Mockito.when(nodeRepository.findById(parentNode.getId()))
-//      .thenReturn(Optional.of(parentNode));
-//
-//    nodeService.deleteNode(parentNode.getId());
-//
-//    Mockito.verify(nodeRepository, Mockito.times(1))
-//      .findById(ArgumentMatchers.eq(parentNode.getId()));
-//
-//    Mockito.verify(nodeRepository, Mockito.times(1))
-//      .delete(ArgumentMatchers.eq(parentNode));
-//
-//    Mockito.verify(parentNode, Mockito.times(1))
-//      .getType();
-//
-//    Mockito.verify(nodeService, Mockito.times(0))
-//      .deleteNode(ArgumentMatchers.eq(parentNode));
-//
-//    Mockito.verify(nodeService, Mockito.times(1))
-//      .deleteNode(ArgumentMatchers.eq(parentNode.getId()));
-  }
+  public void shouldFindNodeAndThenDeleteItAndFlushRepositoryAndUpdateNodeParent() {
+    final Node node = Mockito.spy(new Node());
+    node.setId(UUID.randomUUID().toString());
+    node.setType(Type.CATEGORY);
 
-  @Test
-  public void shouldFindNodeAndCallDeleteNodeTreeMethodBecauseNodeIsCategory() {
-//    final Node parentNode = Mockito.spy(new Node());
-//    parentNode.setId(UUID.randomUUID().toString());
-//    parentNode.setType(Type.CATEGORY);
-//
-//    Mockito.when(nodeRepository.findById(parentNode.getId()))
-//      .thenReturn(Optional.of(parentNode));
-//
-//    Mockito.doNothing()
-//      .when(nodeService)
-//      .deleteNode(ArgumentMatchers.eq(parentNode));
-//
-//    nodeService.deleteNode(parentNode.getId());
-//
-//    Mockito.verify(nodeRepository, Mockito.times(1))
-//      .findById(ArgumentMatchers.eq(parentNode.getId()));
-//
-//    Mockito.verify(nodeRepository, Mockito.times(0))
-//      .delete(ArgumentMatchers.eq(parentNode));
-//
-//    Mockito.verify(parentNode, Mockito.times(1))
-//      .getType();
-//
-//    Mockito.verify(nodeService, Mockito.times(1))
-//      .deleteNode(ArgumentMatchers.eq(parentNode));
-//
-//    Mockito.verify(nodeService, Mockito.times(1))
-//      .deleteNode(ArgumentMatchers.eq(parentNode.getId()));
+    Mockito.when(nodeRepository.findById(node.getId()))
+      .thenReturn(Optional.of(node));
+
+    Mockito.doNothing()
+      .when(nodeService)
+      .updateCategory(
+        ArgumentMatchers.eq(node),
+        ArgumentMatchers.any(LocalDateTime.class));
+
+    nodeService.deleteNode(node.getId());
+
+    Mockito.verify(nodeRepository, Mockito.times(1))
+      .findById(ArgumentMatchers.eq(node.getId()));
+
+    Mockito.verify(nodeRepository, Mockito.times(1))
+      .delete(ArgumentMatchers.eq(node));
+
+    Mockito.verify(nodeRepository, Mockito.times(1))
+      .flush();
+
+    Mockito.verify(nodeService, Mockito.times(1))
+      .updateCategory(
+        ArgumentMatchers.eq(node.getParentNode()),
+        ArgumentMatchers.any(LocalDateTime.class));
   }
 }
