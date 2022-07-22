@@ -3,6 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Configs ###
+*.properties
+
 ### STS ###
 .apt_generated
 .classpath
