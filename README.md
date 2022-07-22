@@ -59,10 +59,49 @@ $ docker run --restart=unless-stopped -p 3306:3306 -d --name mariadb -eMARIADB_R
 $ docker exec -i mariadb sh -c 'mysql --host=localhost --user=root --password=pass' < 01-user-setup.sql && docker exec -i mariadb sh -c 'mysql --host=localhost --user=root --password=pass' < 02-database-setup.sql
 ```
 
-#### 4. Running a project in a docker container
+#### 4. Project configuration
 ```
 $ cd <PATH_TO_PROJECT_ROOT>
 ```
+> Replace all values between **<>**.
+```
+$ vim src/main/resources/application.properties
+# Database Configuration
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+spring.datasource.url=jdbc:mariadb://localhost:3306/mega_market?autoReconnect=true
+spring.datasource.username=<DATABASE_USER>
+spring.datasource.password=<DATABASE_PASSWORD>
+
+# Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB103Dialect
+
+# Spring Server Configuration
+server.port=8000
+server.error.include-message=always
+
+# MVC Configuration
+spring.mvc.format.date-time=iso
+```
+> Replace all values between **<>**.
+```
+$ vim src/test/resources/test.properties
+# Database Configuration
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+spring.datasource.url=jdbc:mariadb://localhost:3306/mega_market_test?autoReconnect=true
+spring.datasource.username=<DATABASE_USER>
+spring.datasource.password=<DATABASE_PASSWORD>
+
+# Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB103Dialect
+
+# Spring Server Configuration
+server.port=8000
+server.error.include-message=always
+```
+
+#### 5. Running a project in a docker container
 ```
 $ mvn package
 ```
@@ -73,7 +112,7 @@ $ docker build -t mega_market .
 $ docker run --restart=unless-stopped -d --network=host --name mega_market_container mega_market
 ```
 
-#### 5. Nginx server configuration
+#### 6. Nginx server configuration
 ```
 $ sudo vim /etc/nginx/nginx.conf
 user ubuntu;
@@ -129,4 +168,4 @@ http {
 $ sudo systemctl restart nginx
 ```
 
-#### 6. The project is now available on port `80` :confetti_ball:
+#### 7. The project is now available on port `80` :confetti_ball:
